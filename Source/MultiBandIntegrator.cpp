@@ -76,46 +76,85 @@ void MultiBandIntegratorSettings::setRollingWindowParameters(float sampleRate, v
 MultiBandIntegrator::MultiBandIntegrator()
     : GenericProcessor  ("Multi-Band Integrator")
 {
-    
-    addSelectedChannelsParameter(Parameter::STREAM_SCOPE,
-                                 "Channel", "The input channel to analyze", 1);
-    
-    
-    addIntParameter(Parameter::GLOBAL_SCOPE,
-                    "window_ms", "The size of the rolling average window in milliseconds",
-                    1000, 10, 5000);
-    
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "alpha_low", "The alpha band low cut",
-                    6.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "alpha_high", "The alpha band high cut",
-                    9.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "alpha_gain", "The alpha band gain",
-                    4.0, -20.0, 20.0, false);
-    
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "beta_low", "The beta band low cut",
-                    13.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "beta_high", "The beta band high cut",
-                    18.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "beta_gain", "The beta band gain",
-                    7.0, -20.0, 20.0, false);
-    
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "delta_low", "The delta band low cut",
-                    1.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "delta_high", "The delta band high cut",
-                    4.0, 0.1, 300.0, false);
-    addFloatParameter(Parameter::GLOBAL_SCOPE,
-                    "delta_gain", "The delta band gain",
-                    -1.0, -20.0, 20.0, false);
-    
     scratchBuffer.setSize(3, 10000);
+}
+
+void MultiBandIntegrator::registerParameters()
+{
+    addSelectedChannelsParameter(Parameter::STREAM_SCOPE,
+                                "Channel",
+                                "Channel",
+                                "The input channel to analyze", 1);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "window_ms",
+                    "Rolling Avg Window",
+                    "The size of the rolling average window in milliseconds",
+                    "ms",
+                    1000, 10, 5000, 1);
+    
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "alpha_low",
+                    "Alpha Low",
+                    "The alpha band low cut",
+                    "",
+                    6.0, 0.1, 300.0, 0.1, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "alpha_high",
+                    "Alpha High",
+                    "The alpha band high cut",
+                    "",
+                    9.0, 0.1, 300.0, 0.1, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "alpha_gain",
+                    "Alpha Gain",
+                    "The alpha band gain",
+                    "",
+                    4.0, -20.0, 20.0, 0.1, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "beta_low",
+                    "Beta Low",
+                    "The beta band low cut",
+                    "",
+                    13.0, 0.1, 300.0, 0.1, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "beta_high",
+                    "Beta High",
+                    "The beta band high cut",
+                    "",
+                    18.0, 0.1, 300.0, 0.1, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "beta_gain",
+                    "Beta Gain",
+                    "The beta band gain",
+                    "",
+                    7.0, -20.0, 20.0, 0.1, false);
+    
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "delta_low",
+                    "Delta Low",
+                    "The delta band low cut",
+                    "",
+                    1.0, 0.1, 300.0, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "delta_high",
+                    "Delta High",
+                    "The delta band high cut",
+                    "",
+                    4.0, 0.1, 300.0, false);
+
+    addFloatParameter(Parameter::PROCESSOR_SCOPE,
+                    "delta_gain",
+                    "Delta Gain",
+                    "The delta band gain",
+                    "",
+                    -1.0, -20.0, 20.0, 0.1, false);
 }
 
 AudioProcessorEditor* MultiBandIntegrator::createEditor()

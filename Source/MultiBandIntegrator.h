@@ -130,6 +130,9 @@ public:
     
     /** Creates the custom editor for this plugin */
     AudioProcessorEditor* createEditor() override;
+
+    /** Registers the parameters for this plugin */
+    void registerParameters() override;
     
     /** Applies filters to a subset of channels, and sums the resulst*/
     void process(AudioBuffer<float>& buffer) override;

@@ -37,7 +37,7 @@ class CustomLabel
 {
 public:
     /** Constructor*/
-    CustomLabel(Parameter* param, Colour colour);
+    CustomLabel(Parameter* param);
 
     /** Destructor */
     ~CustomLabel() { }
