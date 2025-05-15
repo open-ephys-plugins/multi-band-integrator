@@ -23,77 +23,77 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "MultiBandIntegratorEditor.h"
 #include "MultiBandIntegrator.h"
 
-CustomLabel::CustomLabel(Parameter* param) : ParameterEditor(param)
+CustomLabel::CustomLabel (Parameter* param) : ParameterEditor (param)
 {
-    label.addListener(this);
-    label.setBounds(0, 0, 40, 15);
-    label.setEditable(true);
-    addAndMakeVisible(&label);
-    setBounds(0, 0, 40, 15);
+    label.addListener (this);
+    label.setBounds (0, 0, 40, 15);
+    label.setEditable (true);
+    addAndMakeVisible (&label);
+    setBounds (0, 0, 40, 15);
 }
 
-void BackgroundComponent::paint(Graphics& g)
+void BackgroundComponent::paint (Graphics& g)
 {
-    g.setColour( findColour (ThemeColours::widgetBackground));
-    g.fillRoundedRectangle(120, 25, 130, 65, 3.0f);
-    
+    g.setColour (findColour (ThemeColours::widgetBackground));
+    g.fillRoundedRectangle (120, 25, 130, 65, 3.0f);
+
     g.setColour (findColour (ThemeColours::defaultText));
-    g.setFont (FontOptions("Inter", "Regular", 13.0f));
-    g.drawText("low", 125, 12, 40, 10, Justification::left);
-    g.drawText("high", 165, 12, 40, 10, Justification::left);
-    g.drawText("gain", 205, 12, 40, 10, Justification::left);
-    
-    g.drawText(CharPointer_UTF8("α"), 108, 32, 50, 10, Justification::left);
-    g.drawText(CharPointer_UTF8("β"), 108, 52, 50, 10, Justification::left);
-    g.drawText(CharPointer_UTF8("δ"), 108, 72, 50, 10, Justification::left);
+    g.setFont (FontOptions ("Inter", "Regular", 13.0f));
+    g.drawText ("low", 125, 12, 40, 10, Justification::left);
+    g.drawText ("high", 165, 12, 40, 10, Justification::left);
+    g.drawText ("gain", 205, 12, 40, 10, Justification::left);
 
-    g.setColour (findColour (ThemeColours::componentBackground).darker(0.3f));
-    g.fillRect(122, 27, 126, 18);
+    g.drawText (CharPointer_UTF8 ("α"), 108, 32, 50, 10, Justification::left);
+    g.drawText (CharPointer_UTF8 ("β"), 108, 52, 50, 10, Justification::left);
+    g.drawText (CharPointer_UTF8 ("δ"), 108, 72, 50, 10, Justification::left);
 
-    g.setColour (findColour (ThemeColours::componentBackground).darker(0.15f));
-    g.fillRect(122, 48, 126, 18);
-    
+    g.setColour (findColour (ThemeColours::componentBackground).darker (0.3f));
+    g.fillRect (122, 27, 126, 18);
+
+    g.setColour (findColour (ThemeColours::componentBackground).darker (0.15f));
+    g.fillRect (122, 48, 126, 18);
+
     g.setColour (findColour (ThemeColours::componentBackground));
-    g.fillRect(122, 69, 126, 18);
+    g.fillRect (122, 69, 126, 18);
 }
 
-MultiBandIntegratorEditor::MultiBandIntegratorEditor(GenericProcessor* parentNode)
-    : GenericEditor(parentNode)
+MultiBandIntegratorEditor::MultiBandIntegratorEditor (GenericProcessor* parentNode)
+    : GenericEditor (parentNode)
 {
-	desiredWidth = 254;
+    desiredWidth = 254;
 
-    addSelectedChannelsParameterEditor(Parameter::ParameterScope::STREAM_SCOPE, "Channel", 10, 35);
-    ParameterEditor* channelEditor = getParameterEditor("Channel");
-    channelEditor->setLayout(ParameterEditor::Layout::nameOnTop);
-    channelEditor->setSize(90,34);
+    addSelectedChannelsParameterEditor (Parameter::ParameterScope::STREAM_SCOPE, "Channel", 10, 35);
+    ParameterEditor* channelEditor = getParameterEditor ("Channel");
+    channelEditor->setLayout (ParameterEditor::Layout::nameOnTop);
+    channelEditor->setSize (90, 34);
 
-    addTextBoxParameterEditor(Parameter::ParameterScope::PROCESSOR_SCOPE, "window_ms", 10, 77);
-    ParameterEditor* windowEditor = getParameterEditor("window_ms");
-    windowEditor->setLayout(ParameterEditor::Layout::nameOnTop);
-    windowEditor->setSize(90,34);
-    
-    Parameter* param = getProcessor()->getParameter("alpha_low");
-    addCustomParameterEditor(new CustomLabel(param), 125, 55);
-    param = getProcessor()->getParameter("alpha_high");
-    addCustomParameterEditor(new CustomLabel(param), 165, 55);
-    param = getProcessor()->getParameter("alpha_gain");
-    addCustomParameterEditor(new CustomLabel(param), 205, 55);
-    
-    param = getProcessor()->getParameter("beta_low");
-    addCustomParameterEditor(new CustomLabel(param), 125, 75);
-    param = getProcessor()->getParameter("beta_high");
-    addCustomParameterEditor(new CustomLabel(param), 165, 75);
-    param = getProcessor()->getParameter("beta_gain");
-    addCustomParameterEditor(new CustomLabel(param), 205, 75);
-    
-    param = getProcessor()->getParameter("delta_low");
-    addCustomParameterEditor(new CustomLabel(param), 125, 95);
-    param = getProcessor()->getParameter("delta_high");
-    addCustomParameterEditor(new CustomLabel(param), 165, 95);
-    param = getProcessor()->getParameter("delta_gain");
-    addCustomParameterEditor(new CustomLabel(param), 205, 95);
+    addTextBoxParameterEditor (Parameter::ParameterScope::PROCESSOR_SCOPE, "window_ms", 10, 77);
+    ParameterEditor* windowEditor = getParameterEditor ("window_ms");
+    windowEditor->setLayout (ParameterEditor::Layout::nameOnTop);
+    windowEditor->setSize (90, 34);
 
-    addAndMakeVisible(&backgroundComponent);
-    backgroundComponent.setBounds(0, 25, 250, 140);
+    Parameter* param = getProcessor()->getParameter ("alpha_low");
+    addCustomParameterEditor (new CustomLabel (param), 125, 55);
+    param = getProcessor()->getParameter ("alpha_high");
+    addCustomParameterEditor (new CustomLabel (param), 165, 55);
+    param = getProcessor()->getParameter ("alpha_gain");
+    addCustomParameterEditor (new CustomLabel (param), 205, 55);
+
+    param = getProcessor()->getParameter ("beta_low");
+    addCustomParameterEditor (new CustomLabel (param), 125, 75);
+    param = getProcessor()->getParameter ("beta_high");
+    addCustomParameterEditor (new CustomLabel (param), 165, 75);
+    param = getProcessor()->getParameter ("beta_gain");
+    addCustomParameterEditor (new CustomLabel (param), 205, 75);
+
+    param = getProcessor()->getParameter ("delta_low");
+    addCustomParameterEditor (new CustomLabel (param), 125, 95);
+    param = getProcessor()->getParameter ("delta_high");
+    addCustomParameterEditor (new CustomLabel (param), 165, 95);
+    param = getProcessor()->getParameter ("delta_gain");
+    addCustomParameterEditor (new CustomLabel (param), 205, 95);
+
+    addAndMakeVisible (&backgroundComponent);
+    backgroundComponent.setBounds (0, 25, 250, 140);
     backgroundComponent.toBack();
 }

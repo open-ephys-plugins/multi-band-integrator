@@ -25,11 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MULTIBAND_INTEGRATOR_EDITOR_H_INCLUDED
 
 #include <EditorHeaders.h>
-#include <string>
-#include <climits>
-#include <cfloat>
 #include <algorithm>
-
+#include <cfloat>
+#include <climits>
+#include <string>
 
 class CustomLabel
     : public ParameterEditor,
@@ -37,36 +36,33 @@ class CustomLabel
 {
 public:
     /** Constructor*/
-    CustomLabel(Parameter* param);
+    CustomLabel (Parameter* param);
 
     /** Destructor */
-    ~CustomLabel() { }
+    ~CustomLabel() {}
 
     /** Respond to text input*/
-    void labelTextChanged(Label*)
+    void labelTextChanged (Label*)
     {
-        param->setNextValue(label.getText().getFloatValue());
+        param->setNextValue (label.getText().getFloatValue());
     }
 
     /** Updates the view*/
     void updateView()
     {
-        label.setText(param->getValueAsString(), dontSendNotification);
+        label.setText (param->getValueAsString(), dontSendNotification);
     }
-    
+
 private:
-    
     Label label;
-    
 };
 
 /** Draws editor background*/
 class BackgroundComponent : public Component
 {
 public:
-    void paint(Graphics& g) override;
+    void paint (Graphics& g) override;
 };
-
 
 /**
 Editor (in signal chain) contains:
@@ -77,21 +73,17 @@ Editor (in signal chain) contains:
 */
 
 class MultiBandIntegratorEditor
-	: public GenericEditor
+    : public GenericEditor
 {
 public:
-    
     /** Constructor */
-	MultiBandIntegratorEditor(GenericProcessor* parentNode);
-    
+    MultiBandIntegratorEditor (GenericProcessor* parentNode);
+
     /** Destructor */
-    ~MultiBandIntegratorEditor() { }
-    
+    ~MultiBandIntegratorEditor() {}
+
 private:
-    
     BackgroundComponent backgroundComponent;
 };
 
-
-
-#endif 
+#endif

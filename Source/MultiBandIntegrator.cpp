@@ -29,132 +29,158 @@ First, simply filtering the data before thresholding
 
 #include "MultiBandIntegratorEditor.h"
 
-
-MultiBandIntegratorSettings::MultiBandIntegratorSettings() :
-    localChannelIndex(0),
-    alphaGain(4.0f),
-    betaGain(7.0f),
-    deltaGain(-1.0f)
+MultiBandIntegratorSettings::MultiBandIntegratorSettings() : localChannelIndex (0),
+                                                             alphaGain (4.0f),
+                                                             betaGain (7.0f),
+                                                             deltaGain (-1.0f)
 {
-    
     for (int n = 0; n < 3; n = n + 1)
     {
-        filters.add(new Dsp::SmoothedFilterDesign
-            <Dsp::Butterworth::Design::BandPass    // design type
-            <2>,                                   // order
-            1,                                     // number of channels (must be const)
-            Dsp::DirectFormII>(1));               // realization
+        filters.add (new Dsp::SmoothedFilterDesign<Dsp::Butterworth::Design::BandPass // design type
+                                                   <2>, // order
+                                                   1, // number of channels (must be const)
+                                                   Dsp::DirectFormII> (1)); // realization
     }
-
 }
 
-void MultiBandIntegratorSettings::updateFilter(int index, float sampleRate,
-                                                var lowCut,
-                                                var highCut)
+void MultiBandIntegratorSettings::updateFilter (int index, float sampleRate, var lowCut, var highCut)
 {
-    
     Dsp::Params params;
-    params[0] = sampleRate;                               // sample rate
-    params[1] = 2;                                        // order
-    params[2] = (float(highCut) + float(lowCut)) / 2;     // center frequency
-    params[3] = float(highCut) - float(lowCut);           // bandwidth
+    params[0] = sampleRate; // sample rate
+    params[1] = 2; // order
+    params[2] = (float (highCut) + float (lowCut)) / 2; // center frequency
+    params[3] = float (highCut) - float (lowCut); // bandwidth
 
-    filters[index]->setParams(params);
-
+    filters[index]->setParams (params);
 }
 
-void MultiBandIntegratorSettings::setRollingWindowParameters(float sampleRate, var rollDuration)
+void MultiBandIntegratorSettings::setRollingWindowParameters (float sampleRate, var rollDuration)
 {
+    int buffSize = int (sampleRate * float (rollDuration) / 1000.0f);
 
-    int buffSize = int(sampleRate * float(rollDuration) / 1000.0f);
-
-    rollingAverage.setSize(buffSize);
-
+    rollingAverage.setSize (buffSize);
 }
-
 
 MultiBandIntegrator::MultiBandIntegrator()
-    : GenericProcessor  ("Multi-Band Integrator")
+    : GenericProcessor ("Multi-Band Integrator")
 {
-    scratchBuffer.setSize(3, 10000);
+    scratchBuffer.setSize (3, 10000);
 }
 
 void MultiBandIntegrator::registerParameters()
 {
-    addSelectedChannelsParameter(Parameter::STREAM_SCOPE,
-                                "Channel",
-                                "Input Channel",
-                                "The input channel to analyze", 1);
+    addSelectedChannelsParameter (Parameter::STREAM_SCOPE,
+                                  "Channel",
+                                  "Input Channel",
+                                  "The input channel to analyze",
+                                  1);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "window_ms",
-                    "Roll. Avg Window",
-                    "The size of the rolling average window in milliseconds",
-                    "ms",
-                    1000, 10, 5000, 1);
-    
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "alpha_low",
-                    "Alpha Low",
-                    "The alpha band low cut",
-                    "",
-                    6.0, 0.1, 300.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "window_ms",
+                       "Roll. Avg Window",
+                       "The size of the rolling average window in milliseconds",
+                       "ms",
+                       1000,
+                       10,
+                       5000,
+                       1);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "alpha_high",
-                    "Alpha High",
-                    "The alpha band high cut",
-                    "",
-                    9.0, 0.1, 300.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "alpha_low",
+                       "Alpha Low",
+                       "The alpha band low cut",
+                       "",
+                       6.0,
+                       0.1,
+                       300.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "alpha_gain",
-                    "Alpha Gain",
-                    "The alpha band gain",
-                    "",
-                    4.0, -20.0, 20.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "alpha_high",
+                       "Alpha High",
+                       "The alpha band high cut",
+                       "",
+                       9.0,
+                       0.1,
+                       300.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "beta_low",
-                    "Beta Low",
-                    "The beta band low cut",
-                    "",
-                    13.0, 0.1, 300.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "alpha_gain",
+                       "Alpha Gain",
+                       "The alpha band gain",
+                       "",
+                       4.0,
+                       -20.0,
+                       20.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "beta_high",
-                    "Beta High",
-                    "The beta band high cut",
-                    "",
-                    18.0, 0.1, 300.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "beta_low",
+                       "Beta Low",
+                       "The beta band low cut",
+                       "",
+                       13.0,
+                       0.1,
+                       300.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "beta_gain",
-                    "Beta Gain",
-                    "The beta band gain",
-                    "",
-                    7.0, -20.0, 20.0, 0.1, false);
-    
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "delta_low",
-                    "Delta Low",
-                    "The delta band low cut",
-                    "",
-                    1.0, 0.1, 300.0, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "beta_high",
+                       "Beta High",
+                       "The beta band high cut",
+                       "",
+                       18.0,
+                       0.1,
+                       300.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "delta_high",
-                    "Delta High",
-                    "The delta band high cut",
-                    "",
-                    4.0, 0.1, 300.0, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "beta_gain",
+                       "Beta Gain",
+                       "The beta band gain",
+                       "",
+                       7.0,
+                       -20.0,
+                       20.0,
+                       0.1,
+                       false);
 
-    addFloatParameter(Parameter::PROCESSOR_SCOPE,
-                    "delta_gain",
-                    "Delta Gain",
-                    "The delta band gain",
-                    "",
-                    -1.0, -20.0, 20.0, 0.1, false);
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "delta_low",
+                       "Delta Low",
+                       "The delta band low cut",
+                       "",
+                       1.0,
+                       0.1,
+                       300.0,
+                       false);
+
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "delta_high",
+                       "Delta High",
+                       "The delta band high cut",
+                       "",
+                       4.0,
+                       0.1,
+                       300.0,
+                       false);
+
+    addFloatParameter (Parameter::PROCESSOR_SCOPE,
+                       "delta_gain",
+                       "Delta Gain",
+                       "The delta band gain",
+                       "",
+                       -1.0,
+                       -20.0,
+                       20.0,
+                       0.1,
+                       false);
 }
 
 AudioProcessorEditor* MultiBandIntegrator::createEditor()
@@ -164,145 +190,138 @@ AudioProcessorEditor* MultiBandIntegrator::createEditor()
     return editor.get();
 }
 
-
 void MultiBandIntegrator::updateSettings()
 {
-    
-    settings.update(getDataStreams());
-    
+    settings.update (getDataStreams());
+
     for (auto stream : getDataStreams())
     {
         for (int i = 0; i < 3; i++)
         {
-            
             var lowCut, highCut;
-            
+
             if (i == 0)
             {
-                lowCut = getParameter("alpha_low")->getValue();
-                highCut = getParameter("alpha_high")->getValue();
-            } else if (i == 1)
-            {
-                lowCut = getParameter("beta_low")->getValue();
-                highCut = getParameter("beta_high")->getValue();
-            } else if (i == 2)
-            {
-                lowCut = getParameter("delta_low")->getValue();
-                highCut = getParameter("delta_high")->getValue();
+                lowCut = getParameter ("alpha_low")->getValue();
+                highCut = getParameter ("alpha_high")->getValue();
             }
-            
-            settings[stream->getStreamId()]->updateFilter(i,
-                                                           stream->getSampleRate(),
-                                                          lowCut, highCut);
+            else if (i == 1)
+            {
+                lowCut = getParameter ("beta_low")->getValue();
+                highCut = getParameter ("beta_high")->getValue();
+            }
+            else if (i == 2)
+            {
+                lowCut = getParameter ("delta_low")->getValue();
+                highCut = getParameter ("delta_high")->getValue();
+            }
 
+            settings[stream->getStreamId()]->updateFilter (i,
+                                                           stream->getSampleRate(),
+                                                           lowCut,
+                                                           highCut);
         }
-        
-        settings[stream->getStreamId()]->setRollingWindowParameters(stream->getSampleRate(),
-                                                                    getParameter("window_ms")->getValue());
-        
+
+        settings[stream->getStreamId()]->setRollingWindowParameters (stream->getSampleRate(),
+                                                                     getParameter ("window_ms")->getValue());
     }
 }
 
-void MultiBandIntegrator::process(AudioBuffer<float>& continuousBuffer)
+void MultiBandIntegrator::process (AudioBuffer<float>& continuousBuffer)
 {
-    
     for (auto stream : getDataStreams())
     {
-
         if ((*stream)["enable_stream"])
         {
             MultiBandIntegratorSettings* module = settings[stream->getStreamId()];
-            
+
             const uint16 streamId = stream->getStreamId();
-            const uint32 numSamplesInBlock = getNumSamplesInBlock(streamId);
+            const uint32 numSamplesInBlock = getNumSamplesInBlock (streamId);
 
             int localIndex = module->localChannelIndex;
-            
+
             if (localIndex < 0 || numSamplesInBlock == 0)
                 continue;
-            
+
             int globalIndex = stream->getContinuousChannels()[localIndex]->getGlobalIndex();
-            
+
             for (int i = 0; i < 3; i++)
             {
-                scratchBuffer.copyFrom(i,
-                                       0,
-                                       continuousBuffer,
-                                       globalIndex,
-                                       0,
-                                       numSamplesInBlock);
+                scratchBuffer.copyFrom (i,
+                                        0,
+                                        continuousBuffer,
+                                        globalIndex,
+                                        0,
+                                        numSamplesInBlock);
             }
-            
-            float* ptrA = scratchBuffer.getWritePointer(0);
-            module->filters[0]->process(numSamplesInBlock, &ptrA);
-            scratchBuffer.applyGain(0,
-                                    0,
-                                    numSamplesInBlock,
-                                    module->alphaGain);
 
-            float* ptrB = scratchBuffer.getWritePointer(1);
-            module->filters[1]->process(numSamplesInBlock, &ptrB);
-            scratchBuffer.applyGain(1,
-                                    0,
-                                    numSamplesInBlock,
-                                    module->betaGain);
+            float* ptrA = scratchBuffer.getWritePointer (0);
+            module->filters[0]->process (numSamplesInBlock, &ptrA);
+            scratchBuffer.applyGain (0,
+                                     0,
+                                     numSamplesInBlock,
+                                     module->alphaGain);
 
-            float* ptrD = scratchBuffer.getWritePointer(2);
-            module->filters[2]->process(numSamplesInBlock, &ptrD);
-            scratchBuffer.applyGain(2,
-                                    0,
-                                    numSamplesInBlock,
-                                    module->deltaGain);
+            float* ptrB = scratchBuffer.getWritePointer (1);
+            module->filters[1]->process (numSamplesInBlock, &ptrB);
+            scratchBuffer.applyGain (1,
+                                     0,
+                                     numSamplesInBlock,
+                                     module->betaGain);
+
+            float* ptrD = scratchBuffer.getWritePointer (2);
+            module->filters[2]->process (numSamplesInBlock, &ptrD);
+            scratchBuffer.applyGain (2,
+                                     0,
+                                     numSamplesInBlock,
+                                     module->deltaGain);
 
             //Now sum the samples together into channel 0 of the scratch buffer
-            scratchBuffer.addFrom(0,                  //dest channel
-                                 0,                   //dest start sample
-                                 scratchBuffer,       //source buffer
-                                 1,                   //source channel
-                                 0,                   //source start sample
-                                 numSamplesInBlock);  //num samples
+            scratchBuffer.addFrom (0, //dest channel
+                                   0, //dest start sample
+                                   scratchBuffer, //source buffer
+                                   1, //source channel
+                                   0, //source start sample
+                                   numSamplesInBlock); //num samples
 
-            scratchBuffer.addFrom(0,                  //dest channel
-                                 0,                   //dest start sample
-                                 scratchBuffer,       //source buffer
-                                 2,                   //source channel
-                                 0,                   //source start sample
-                                 numSamplesInBlock);  //num samples
-            
+            scratchBuffer.addFrom (0, //dest channel
+                                   0, //dest start sample
+                                   scratchBuffer, //source buffer
+                                   2, //source channel
+                                   0, //source start sample
+                                   numSamplesInBlock); //num samples
+
             //put the rolling mean into channel 1 of the scratch buffer
-            scratchBuffer.setSample(1, 0, module->rollingAverage.calculate());
+            scratchBuffer.setSample (1, 0, module->rollingAverage.calculate());
 
-            for (int i = 0; i < numSamplesInBlock-1; i++)
+            for (int i = 0; i < numSamplesInBlock - 1; i++)
             {
-                
-                module->rollingAverage.addSample(
-                        std::fabs(scratchBuffer.getSample(0, i + 1)
-                                - scratchBuffer.getSample(0, i)));
-                
-                
-                scratchBuffer.setSample(1, i+1, module->rollingAverage.calculate());
+                module->rollingAverage.addSample (
+                    std::fabs (scratchBuffer.getSample (0, i + 1)
+                               - scratchBuffer.getSample (0, i)));
+
+                scratchBuffer.setSample (1, i + 1, module->rollingAverage.calculate());
             }
 
             //add gain to output signal so that its units are more useful
-            scratchBuffer.applyGain(1, 0, numSamplesInBlock, 10);
+            scratchBuffer.applyGain (1, 0, numSamplesInBlock, 10);
 
             //overwrite the input channel with averaged data
-            continuousBuffer.copyFrom(globalIndex,
-                                      0,
-                                      scratchBuffer,
-                                      1,
-                                      0,
-                                      numSamplesInBlock);
+            continuousBuffer.copyFrom (globalIndex,
+                                       0,
+                                       scratchBuffer,
+                                       1,
+                                       0,
+                                       numSamplesInBlock);
         }
     }
 }
 
-void MultiBandIntegrator::parameterValueChanged(Parameter* param)
+void MultiBandIntegrator::parameterValueChanged (Parameter* param)
 {
-    if (param->getName().equalsIgnoreCase("alpha_low"))
+    if (param->getName().equalsIgnoreCase ("alpha_low"))
     {
-
-        if (param->getValue() >= getParameter("alpha_high")->getValue())
+        if (param->getValue() >= getParameter ("alpha_high")->getValue())
         {
             param->restorePreviousValue();
             return;
@@ -310,16 +329,15 @@ void MultiBandIntegrator::parameterValueChanged(Parameter* param)
 
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->updateFilter(0,
-                                                          stream->getSampleRate(),
-                                                          param->getValue(),
-                                                          getParameter("alpha_high")->getValue());
+            settings[stream->getStreamId()]->updateFilter (0,
+                                                           stream->getSampleRate(),
+                                                           param->getValue(),
+                                                           getParameter ("alpha_high")->getValue());
         }
     }
-    else if (param->getName().equalsIgnoreCase("alpha_high"))
+    else if (param->getName().equalsIgnoreCase ("alpha_high"))
     {
-
-        if (param->getValue() <= getParameter("alpha_low")->getValue())
+        if (param->getValue() <= getParameter ("alpha_low")->getValue())
         {
             param->restorePreviousValue();
             return;
@@ -327,77 +345,22 @@ void MultiBandIntegrator::parameterValueChanged(Parameter* param)
 
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->updateFilter(0,
-                                                          stream->getSampleRate(),
-                                                          getParameter("alpha_low")->getValue(),
-                                                          param->getValue());
-        }
-    } else if (param->getName().equalsIgnoreCase("alpha_gain"))
-    {
-        for (auto stream : getDataStreams())
-        {
-            settings[stream->getStreamId()]->alphaGain = float(param->getValue());
-        }
-    } if (param->getName().equalsIgnoreCase("beta_low"))
-    {
-
-        if (param->getValue() >= getParameter("beta_high")->getValue())
-        {
-            param->restorePreviousValue();
-            return;
-        }
-
-        for (auto stream : getDataStreams())
-        {
-            settings[stream->getStreamId()]->updateFilter(1,
-                                                          stream->getSampleRate(),
-                                                          param->getValue(),
-                                                          getParameter("beta_high")->getValue());
+            settings[stream->getStreamId()]->updateFilter (0,
+                                                           stream->getSampleRate(),
+                                                           getParameter ("alpha_low")->getValue(),
+                                                           param->getValue());
         }
     }
-    else if (param->getName().equalsIgnoreCase("beta_high"))
-    {
-
-        if (param->getValue() <= getParameter("beta_low")->getValue())
-        {
-            param->restorePreviousValue();
-            return;
-        }
-
-        for (auto stream : getDataStreams())
-        {
-            settings[stream->getStreamId()]->updateFilter(1,
-                                                          stream->getSampleRate(),
-                                                          getParameter("beta_low")->getValue(),
-                                                          param->getValue());
-        }
-    } else if (param->getName().equalsIgnoreCase("beta_gain"))
+    else if (param->getName().equalsIgnoreCase ("alpha_gain"))
     {
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->betaGain = float(param->getValue());
-        }
-    }  if (param->getName().equalsIgnoreCase("delta_low"))
-    {
-
-        if (param->getValue() >= getParameter("delta_high")->getValue())
-        {
-            param->restorePreviousValue();
-            return;
-        }
-
-        for (auto stream : getDataStreams())
-        {
-            settings[stream->getStreamId()]->updateFilter(2,
-                                                          stream->getSampleRate(),
-                                                          param->getValue(),
-                                                          getParameter("delta_high")->getValue());
+            settings[stream->getStreamId()]->alphaGain = float (param->getValue());
         }
     }
-    else if (param->getName().equalsIgnoreCase("delta_high"))
+    if (param->getName().equalsIgnoreCase ("beta_low"))
     {
-
-        if (param->getValue() <= getParameter("delta_low")->getValue())
+        if (param->getValue() >= getParameter ("beta_high")->getValue())
         {
             param->restorePreviousValue();
             return;
@@ -405,29 +368,87 @@ void MultiBandIntegrator::parameterValueChanged(Parameter* param)
 
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->updateFilter(2,
-                                                          stream->getSampleRate(),
-                                                          getParameter("delta_low")->getValue(),
-                                                          param->getValue());
+            settings[stream->getStreamId()]->updateFilter (1,
+                                                           stream->getSampleRate(),
+                                                           param->getValue(),
+                                                           getParameter ("beta_high")->getValue());
         }
-    } else if (param->getName().equalsIgnoreCase("delta_gain"))
+    }
+    else if (param->getName().equalsIgnoreCase ("beta_high"))
+    {
+        if (param->getValue() <= getParameter ("beta_low")->getValue())
+        {
+            param->restorePreviousValue();
+            return;
+        }
+
+        for (auto stream : getDataStreams())
+        {
+            settings[stream->getStreamId()]->updateFilter (1,
+                                                           stream->getSampleRate(),
+                                                           getParameter ("beta_low")->getValue(),
+                                                           param->getValue());
+        }
+    }
+    else if (param->getName().equalsIgnoreCase ("beta_gain"))
     {
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->deltaGain = float(param->getValue());
+            settings[stream->getStreamId()]->betaGain = float (param->getValue());
         }
-    }  else if (param->getName().equalsIgnoreCase("window_ms"))
+    }
+    if (param->getName().equalsIgnoreCase ("delta_low"))
+    {
+        if (param->getValue() >= getParameter ("delta_high")->getValue())
+        {
+            param->restorePreviousValue();
+            return;
+        }
+
+        for (auto stream : getDataStreams())
+        {
+            settings[stream->getStreamId()]->updateFilter (2,
+                                                           stream->getSampleRate(),
+                                                           param->getValue(),
+                                                           getParameter ("delta_high")->getValue());
+        }
+    }
+    else if (param->getName().equalsIgnoreCase ("delta_high"))
+    {
+        if (param->getValue() <= getParameter ("delta_low")->getValue())
+        {
+            param->restorePreviousValue();
+            return;
+        }
+
+        for (auto stream : getDataStreams())
+        {
+            settings[stream->getStreamId()]->updateFilter (2,
+                                                           stream->getSampleRate(),
+                                                           getParameter ("delta_low")->getValue(),
+                                                           param->getValue());
+        }
+    }
+    else if (param->getName().equalsIgnoreCase ("delta_gain"))
     {
         for (auto stream : getDataStreams())
         {
-            settings[stream->getStreamId()]->setRollingWindowParameters(stream->getSampleRate(), param->getValue());
+            settings[stream->getStreamId()]->deltaGain = float (param->getValue());
         }
-    } else if (param->getName().equalsIgnoreCase("Channel"))
+    }
+    else if (param->getName().equalsIgnoreCase ("window_ms"))
+    {
+        for (auto stream : getDataStreams())
+        {
+            settings[stream->getStreamId()]->setRollingWindowParameters (stream->getSampleRate(), param->getValue());
+        }
+    }
+    else if (param->getName().equalsIgnoreCase ("Channel"))
     {
         Array<var>* array = param->getValue().getArray();
-        
+
         if (array->size() > 0)
-            settings[param->getStreamId()]->localChannelIndex = int(array->getReference(0));
+            settings[param->getStreamId()]->localChannelIndex = int (array->getReference (0));
         else
             settings[param->getStreamId()]->localChannelIndex = -1;
     }
@@ -435,34 +456,33 @@ void MultiBandIntegrator::parameterValueChanged(Parameter* param)
 
 RollingAverage::RollingAverage()
 {
-	setSize(1);
+    setSize (1);
 
-	newSamples = 0;
-	sum = 0;
+    newSamples = 0;
+    sum = 0;
 }
 
-void RollingAverage::setSize(int numSamples)
+void RollingAverage::setSize (int numSamples)
 {
-	buffer.clear();
-	buffer.insertMultiple(0, 0, numSamples);
-	index = 0;
+    buffer.clear();
+    buffer.insertMultiple (0, 0, numSamples);
+    index = 0;
 
-	sum = 0;
+    sum = 0;
 }
 
-void RollingAverage::addSample(double sample)
+void RollingAverage::addSample (double sample)
 {
-	sum -= buffer[index];
-	sum += sample;
+    sum -= buffer[index];
+    sum += sample;
 
-	buffer.set(index, sample);
+    buffer.set (index, sample);
 
-	index += 1;
-	index %= buffer.size();
+    index += 1;
+    index %= buffer.size();
 }
 
-
-double RollingAverage::calculate() {
-
-	return sum / buffer.size();
+double RollingAverage::calculate()
+{
+    return sum / buffer.size();
 }
