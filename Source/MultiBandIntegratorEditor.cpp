@@ -34,17 +34,27 @@ CustomLabel::CustomLabel(Parameter* param) : ParameterEditor(param)
 
 void BackgroundComponent::paint(Graphics& g)
 {
-    g.setColour( findColour (ThemeColours::componentBackground));
+    g.setColour( findColour (ThemeColours::widgetBackground));
     g.fillRoundedRectangle(120, 25, 130, 65, 3.0f);
     
     g.setColour (findColour (ThemeColours::defaultText));
-    g.drawText("low", 125, 12, 40, 10, Justification::centred);
-    g.drawText("high", 165, 12, 40, 10, Justification::centred);
-    g.drawText("gain", 205, 12, 40, 10, Justification::centred);
+    g.setFont (FontOptions("Inter", "Regular", 13.0f));
+    g.drawText("low", 125, 12, 40, 10, Justification::left);
+    g.drawText("high", 165, 12, 40, 10, Justification::left);
+    g.drawText("gain", 205, 12, 40, 10, Justification::left);
     
     g.drawText(CharPointer_UTF8("α"), 108, 32, 50, 10, Justification::left);
     g.drawText(CharPointer_UTF8("β"), 108, 52, 50, 10, Justification::left);
     g.drawText(CharPointer_UTF8("δ"), 108, 72, 50, 10, Justification::left);
+
+    g.setColour (findColour (ThemeColours::componentBackground).darker(0.3f));
+    g.fillRect(122, 27, 126, 18);
+
+    g.setColour (findColour (ThemeColours::componentBackground).darker(0.15f));
+    g.fillRect(122, 48, 126, 18);
+    
+    g.setColour (findColour (ThemeColours::componentBackground));
+    g.fillRect(122, 69, 126, 18);
 }
 
 MultiBandIntegratorEditor::MultiBandIntegratorEditor(GenericProcessor* parentNode)

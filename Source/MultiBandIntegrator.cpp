@@ -83,12 +83,12 @@ void MultiBandIntegrator::registerParameters()
 {
     addSelectedChannelsParameter(Parameter::STREAM_SCOPE,
                                 "Channel",
-                                "Channel",
+                                "Input Channel",
                                 "The input channel to analyze", 1);
 
     addFloatParameter(Parameter::PROCESSOR_SCOPE,
                     "window_ms",
-                    "Rolling Avg Window",
+                    "Roll. Avg Window",
                     "The size of the rolling average window in milliseconds",
                     "ms",
                     1000, 10, 5000, 1);
