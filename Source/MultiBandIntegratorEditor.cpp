@@ -65,12 +65,12 @@ MultiBandIntegratorEditor::MultiBandIntegratorEditor (GenericProcessor* parentNo
     addSelectedChannelsParameterEditor (Parameter::ParameterScope::STREAM_SCOPE, "Channel", 10, 35);
     ParameterEditor* channelEditor = getParameterEditor ("Channel");
     channelEditor->setLayout (ParameterEditor::Layout::nameOnTop);
-    channelEditor->setSize (90, 34);
+    channelEditor->setSize (85, 36);
 
     addTextBoxParameterEditor (Parameter::ParameterScope::PROCESSOR_SCOPE, "window_ms", 10, 77);
     ParameterEditor* windowEditor = getParameterEditor ("window_ms");
     windowEditor->setLayout (ParameterEditor::Layout::nameOnTop);
-    windowEditor->setSize (90, 34);
+    windowEditor->setSize (85, 36);
 
     Parameter* param = getProcessor()->getParameter ("alpha_low");
     addCustomParameterEditor (new CustomLabel (param), 125, 55);
